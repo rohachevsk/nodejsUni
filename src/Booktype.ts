@@ -6,4 +6,5 @@ export type BookType = {
     description: string;
     genre: string;
     quote: string;
+    is_active: boolean;
 };

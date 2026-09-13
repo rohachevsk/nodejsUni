@@ -9,6 +9,7 @@ const books: BookType[] = [
         description: 'Эпическая сага о власти, вере и выживании на пустынной планете Арракис.',
         genre: 'Фантастика',
         quote: '«Пустыня учит видеть не глазами, а сердцем.»',
+        is_active: true,
     },
     {
         id: 2,
@@ -18,6 +19,7 @@ const books: BookType[] = [
         description: 'Путешествие по Средиземью, где дружба, мужество и честь становятся главными героями.',
         genre: 'Фэнтези',
         quote: '«Не все те, кто бродят, потеряны.»',
+        is_active: true,
     },
     {
         id: 3,
@@ -27,6 +29,27 @@ const books: BookType[] = [
         description: 'Классическая история о любви, достоинстве и социальном мире.',
         genre: 'Классика',
         quote: '«Ум и характер редко могут быть в равновесии.»',
+        is_active: false,
+    },
+    {
+        id: 4,
+        title: 'Testing',
+        author: 'Test Author',
+        year: 2024,
+        description: 'Example book for filtering by title and active status.',
+        genre: 'Test',
+        quote: '«Test quote.»',
+        is_active: true,
+    },
+    {
+        id: 5,
+        title: 'My Test Book',
+        author: 'Example Writer',
+        year: 2023,
+        description: 'Another example book with the word test in the title.',
+        genre: 'Test',
+        quote: '«Another test quote.»',
+        is_active: true,
     },
 ];
 

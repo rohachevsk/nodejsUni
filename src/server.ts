@@ -19,6 +19,33 @@ app.get('/books', (_req: Request, res: Response) => {
     res.json(books);
 });
 
+app.get('/books/:title/:is_active', (req: Request, res: Response) => {
+    const titleFilter = String(req.params.title ?? '').trim().toLowerCase();
+    const isActiveFilter = String(req.params.is_active ?? '').trim().toLowerCase();
+
+    const activeOnly = isActiveFilter === 'true' || isActiveFilter === '1';
+
+    const filteredBooks = books.filter((book) => {
+        const matchesStatus = book.is_active === activeOnly;
+        const matchesTitle = book.title.toLowerCase().includes(titleFilter);
+        return matchesStatus && matchesTitle;
+    });
+
+    if (!filteredBooks.length) {
+        res.status(404).json({
+            status: 404,
+            error: 'No books found for the given title and active status',
+            data: [],
+        });
+        return;
+    }
+
+    res.status(200).json({
+        status: 200,
+        data: filteredBooks,
+    });
+});
+
 app.get('/books/:id', (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const book = books.find((item) => item.id === id);
@@ -66,7 +93,7 @@ app.delete('/books/:id', (req: Request, res: Response) => {
 });
 
 app.post('/books', (req: Request, res: Response) => {
-    const { title, author, year, description, genre, quote } = req.body ?? {};
+    const { title, author, year, description, genre, quote, is_active } = req.body ?? {};
 
     if (!title || !author || !description || !genre || !quote) {
         res.status(400).json({
@@ -84,6 +111,7 @@ app.post('/books', (req: Request, res: Response) => {
         description: String(description),
         genre: String(genre),
         quote: String(quote),
+        is_active: is_active === undefined ? true : Boolean(is_active),
     };
 
     books.push(newBook);
