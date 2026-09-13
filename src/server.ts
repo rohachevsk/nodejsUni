@@ -12,6 +12,8 @@ const HOST = process.env.HOST || 'localhost';
 
 const app = express();
 
+app.use(express.json());
+
 app.get('/books', (_req: Request, res: Response) => {
     console.log(JSON.stringify(books, null, 2));
     res.json(books);
@@ -61,6 +63,35 @@ app.delete('/books/:id', (req: Request, res: Response) => {
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
+});
+
+app.post('/books', (req: Request, res: Response) => {
+    const { title, author, year, description, genre, quote } = req.body ?? {};
+
+    if (!title || !author || !description || !genre || !quote) {
+        res.status(400).json({
+            error: 'Missing required fields: title, author, description, genre, quote',
+        });
+        return;
+    }
+
+    const nextId = books.reduce((maxId, book) => Math.max(maxId, book.id), 0) + 1;
+    const newBook = {
+        id: nextId,
+        title: String(title),
+        author: String(author),
+        year: Number(year) || new Date().getFullYear(),
+        description: String(description),
+        genre: String(genre),
+        quote: String(quote),
+    };
+
+    books.push(newBook);
+
+    res.status(201).json({
+        message: 'Book added successfully',
+        data: newBook,
+    });
 });
 
 app.get('/', (_req: Request, res: Response) => {

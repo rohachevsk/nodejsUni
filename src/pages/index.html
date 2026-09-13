@@ -47,6 +47,52 @@
             </div>
         </section>
 
+        <section class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Додати нову книгу</h2>
+                    <p>Введіть дані у форму, і книга буде додана в масив books у форматі JSON.</p>
+                </div>
+
+                <form id="book-form" class="book-form">
+                    <div class="form-row">
+                        <label>
+                            Назва
+                            <input type="text" name="title" required />
+                        </label>
+                        <label>
+                            Автор
+                            <input type="text" name="author" required />
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            Рік
+                            <input type="number" name="year" min="0" value="2025" required />
+                        </label>
+                        <label>
+                            Жанр
+                            <input type="text" name="genre" required />
+                        </label>
+                    </div>
+
+                    <label>
+                        Опис
+                        <textarea name="description" rows="4" required></textarea>
+                    </label>
+
+                    <label>
+                        Цитата
+                        <textarea name="quote" rows="3" required></textarea>
+                    </label>
+
+                    <button type="submit" class="btn btn-primary">Додати книгу</button>
+                    <p id="form-message" class="form-message"></p>
+                </form>
+            </div>
+        </section>
+
         <section id="catalog" class="section">
             <div class="container">
                 <div class="section-header">
@@ -142,6 +188,85 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        const form = document.getElementById('book-form');
+        const formMessage = document.getElementById('form-message');
+        const bookGrid = document.querySelector('.book-grid');
+
+        const createBookCard = (book) => {
+            const article = document.createElement('article');
+            article.className = 'book-card';
+
+            const cover = document.createElement('div');
+            cover.className = 'book-cover cover-dune';
+            cover.textContent = book.title.slice(0, 12);
+
+            const title = document.createElement('h3');
+            title.textContent = book.title;
+
+            const meta = document.createElement('div');
+            meta.className = 'book-meta';
+            meta.innerHTML = `
+                <span>${book.author}</span>
+                <span>${book.year}</span>
+            `;
+
+            const description = document.createElement('p');
+            description.textContent = book.description;
+
+            const link = document.createElement('a');
+            link.href = `/book.html?book=${book.title.toLowerCase().replace(/\s+/g, '-')}`;
+            link.className = 'btn btn-primary';
+            link.textContent = 'Смотреть';
+
+            article.appendChild(cover);
+            article.appendChild(title);
+            article.appendChild(meta);
+            article.appendChild(description);
+            article.appendChild(link);
+
+            return article;
+        };
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const book = {
+                title: formData.get('title'),
+                author: formData.get('author'),
+                year: Number(formData.get('year')),
+                description: formData.get('description'),
+                genre: formData.get('genre'),
+                quote: formData.get('quote'),
+            };
+
+            try {
+                const response = await fetch('/books', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(book),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Помилка при додаванні книги');
+                }
+
+                bookGrid.prepend(createBookCard(data.data));
+                formMessage.textContent = `Книга додана: ${data.data.title}`;
+                formMessage.style.color = '#7ee7d1';
+                form.reset();
+            } catch (error) {
+                formMessage.textContent = error.message;
+                formMessage.style.color = '#f7b6b2';
+            }
+        });
+    </script>
 </body>
 
 </html>
