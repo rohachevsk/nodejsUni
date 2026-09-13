@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Книга</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="book-page">
+    <header class="site-header book-header">
+        <div class="container navbar">
+            <a href="/index.html" class="back-link">← Назад в каталог</a>
+            <div class="brand"><span>Litera</span></div>
+        </div>
+    </header>
+
+    <main class="book-detail">
+        <div class="container">
+            <article id="book-detail" class="detail-card">
+                <div id="book-cover" class="detail-cover">Книга</div>
+                <div class="detail-content">
+                    <div id="book-tag" class="eyebrow">Книга</div>
+                    <h1 id="book-title">Заголовок</h1>
+                    <div class="author-row">
+                        <span id="book-author">Автор</span>
+                        <span id="book-year">Год</span>
+                    </div>
+                    <p id="book-description"></p>
+                    <div id="book-quote" class="quote"></div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <script>
+        const books = {
+            dune: {
+                title: 'Дюна',
+                author: 'Френк Герберт',
+                year: '1965',
+                tag: 'Фантастика',
+                description: 'Эпическая сага о власти, вере и борьбе за выживание на пустынной планете Арракис. У каждой страницы есть своя цена, а у каждого решения — последствия.',
+                quote: '«Пустыня учит видеть не глазами, а сердцем.»',
+                coverClass: 'cover-dune',
+                coverText: 'Дюна'
+            },
+            lotr: {
+                title: 'Властелин колец',
+                author: 'Дж. Р. Р. Толкин',
+                year: '1954',
+                tag: 'Эпоха',
+                description: 'Путешествие по Средиземью, где дружба, мужество и вера становятся главными героями. Величайшая история о том, как даже маленькие люди способны изменить мир.',
+                quote: '«Не все те, кто бродят, потеряны.»',
+                coverClass: 'cover-lord',
+                coverText: 'Властелин'
+            },
+            pride: {
+                title: 'Гордость и предубеждение',
+                author: 'Джейн Остин',
+                year: '1813',
+                tag: 'Классика',
+                description: 'Нежная, остроумная и мудрая история о любви, социальном статусе и важности быть честным с собой. В центре — сильный характер, который не идет на компромисс с достоинством.',
+                quote: '«Ум и характер редко могут быть в равновесии.»',
+                coverClass: 'cover-pride',
+                coverText: 'Гордость'
+            },
+            sea: {
+                title: 'Старик и море',
+                author: 'Эрнест Хемингуэй',
+                year: '1952',
+                tag: 'Литература',
+                description: 'История о боли, борьбе и внутренней силе человека. Небольшая по объему, но глубокая по смыслу книга, которая учит выдержке и мужеству.',
+                quote: '«Человек может быть побеждён, но не сломлен.»',
+                coverClass: 'cover-forest',
+                coverText: 'Море'
+            }
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const bookKey = params.get('book') || 'dune';
+        const book = books[bookKey] || books.dune;
+
+        const coverEl = document.getElementById('book-cover');
+        const tagEl = document.getElementById('book-tag');
+        const titleEl = document.getElementById('book-title');
+        const authorEl = document.getElementById('book-author');
+        const yearEl = document.getElementById('book-year');
+        const descriptionEl = document.getElementById('book-description');
+        const quoteEl = document.getElementById('book-quote');
+
+        coverEl.textContent = book.coverText;
+        coverEl.classList.add(book.coverClass);
+        tagEl.textContent = book.tag;
+        titleEl.textContent = book.title;
+        authorEl.textContent = book.author;
+        yearEl.textContent = book.year;
+        descriptionEl.textContent = book.description;
+        quoteEl.textContent = book.quote;
+    </script>
+</body>
+
+</html>

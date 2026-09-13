@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Litera — книжный каталог</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container navbar">
+            <div class="brand"><span>Litera</span></div>
+            <nav class="nav" aria-label="Главная навигация">
+                <a href="#catalog">Каталог</a>
+                <a href="#about">О нас</a>
+                <a href="#reviews">Отзывы</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-inner">
+                <div>
+                    <div class="eyebrow">Книги, которые меняют взгляд</div>
+                    <h1>Открывай <span>новые миры</span> на каждой странице.</h1>
+                    <p>
+                        В каталоге Litera собраны истории, фантастика, классика и книги, которые хочется читать снова и
+                        снова.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="#catalog" class="btn btn-primary">Смотреть каталог</a>
+                        <a href="#about" class="btn btn-secondary">Узнать больше</a>
+                    </div>
+                </div>
+
+                <div class="hero-visual" aria-label="Книжный стек">
+                    <div class="book-stack">
+                        <div class="book"></div>
+                        <div class="book"></div>
+                        <div class="book"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="catalog" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Рекомендуемые книги</h2>
+                    <p>Выберите книгу и откройте её страницу с описанием и цитатами.</p>
+                </div>
+
+                <div class="book-grid">
+                    <article class="book-card">
+                        <div class="book-cover cover-dune">Дюна</div>
+                        <h3>Дюна</h3>
+                        <div class="book-meta">
+                            <span>Френк Герберт</span>
+                            <span>1965</span>
+                        </div>
+                        <p>Эпическая сага о власти, вере и выживании на пустынной планете.</p>
+                        <a href="/book.html?book=dune" class="btn btn-primary">Смотреть</a>
+                    </article>
+
+                    <article class="book-card">
+                        <div class="book-cover cover-lord">Властелин</div>
+                        <h3>Властелин колец</h3>
+                        <div class="book-meta">
+                            <span>Дж. Р. Р. Толкин</span>
+                            <span>1954</span>
+                        </div>
+                        <p>Величайшее путешествие в мир дружбы, храбрости и древней магии.</p>
+                        <a href="/book.html?book=lotr" class="btn btn-primary">Смотреть</a>
+                    </article>
+
+                    <article class="book-card">
+                        <div class="book-cover cover-pride">Гордость</div>
+                        <h3>Гордость и предубеждение</h3>
+                        <div class="book-meta">
+                            <span>Джейн Остин</span>
+                            <span>1813</span>
+                        </div>
+                        <p>Классическая история любви, достоинства и острого ума.</p>
+                        <a href="/book.html?book=pride" class="btn btn-primary">Смотреть</a>
+                    </article>
+
+                    <article class="book-card">
+                        <div class="book-cover cover-forest">Лес</div>
+                        <h3>Старик и море</h3>
+                        <div class="book-meta">
+                            <span>Эрнест Хемингуэй</span>
+                            <span>1952</span>
+                        </div>
+                        <p>Немного света, много мужества и философии жизни в одной книге.</p>
+                        <a href="/book.html?book=sea" class="btn btn-primary">Смотреть</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Почему мы любим книги</h2>
+                    <p>Каждая книга — это путешествие, которое остаётся с вами надолго.</p>
+                </div>
+
+                <div class="gallery-grid">
+                    <figure class="gallery-item">
+                        <img src="/images/hero-books.jpg" alt="Книжная иллюстрация" />
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="/images/library-scene.jpg" alt="Библиотека и книги" />
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="/images/book-icon.jpg" alt="Иконка книги" />
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section id="reviews" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Отзывы читателей</h2>
+                    <p>«Каждая книга здесь подобрана так, что хочется начать читать с первой страницы.»</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="brand"><span>Litera</span></div>
+            <div class="footer-links">
+                <a href="#catalog">Каталог</a>
+                <a href="#about">О нас</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
