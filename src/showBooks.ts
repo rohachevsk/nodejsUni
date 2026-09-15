@@ -1,10 +1,24 @@
 import type { BookType } from './Booktype.js';
+import { authors } from './authors.js';
+
+const getAuthorLinks = (authorIds: number[]) => {
+    if (!authorIds.length) {
+        return 'Не вказано';
+    }
+
+    return authorIds
+        .map((authorId) => {
+            const author = authors.find((item) => item.id === authorId);
+            return author ? `<a href="/authors?id=${author.id}">${author.name}</a>` : 'Невідомий автор';
+        })
+        .join(', ');
+};
 
 const books: BookType[] = [
     {
         id: 1,
         title: 'Дюна',
-        author: 'Френк Герберт',
+        authorIds: [1],
         year: 1965,
         description: 'Эпическая сага о власти, вере и выживании на пустынной планете Арракис.',
         genre: 'Фантастика',
@@ -14,7 +28,7 @@ const books: BookType[] = [
     {
         id: 2,
         title: 'Властелин колец',
-        author: 'Дж. Р. Р. Толкин',
+        authorIds: [2],
         year: 1954,
         description: 'Путешествие по Средиземью, где дружба, мужество и честь становятся главными героями.',
         genre: 'Фэнтези',
@@ -24,7 +38,7 @@ const books: BookType[] = [
     {
         id: 3,
         title: 'Гордость и предубеждение',
-        author: 'Джейн Остин',
+        authorIds: [3],
         year: 1813,
         description: 'Классическая история о любви, достоинстве и социальном мире.',
         genre: 'Классика',
@@ -34,7 +48,7 @@ const books: BookType[] = [
     {
         id: 4,
         title: 'Testing',
-        author: 'Test Author',
+        authorIds: [5, 6],
         year: 2024,
         description: 'Example book for filtering by title and active status.',
         genre: 'Test',
@@ -44,7 +58,7 @@ const books: BookType[] = [
     {
         id: 5,
         title: 'My Test Book',
-        author: 'Example Writer',
+        authorIds: [1, 6],
         year: 2023,
         description: 'Another example book with the word test in the title.',
         genre: 'Test',
@@ -52,6 +66,18 @@ const books: BookType[] = [
         is_active: true,
     },
 ];
+export type getBooksByTitleType = (title: string, books: BookType[]) => BookType[] | null;
+export const getBooksByTitle: getBooksByTitleType = (title: string, books: BookType[]) => {
+    const booksFiltered = books.filter(
+        (book: BookType) => title.toLowerCase().trim() === book.title.toLocaleLowerCase().trim()
+    );
+
+    if (booksFiltered.length > 0) {
+        return booksFiltered;
+    }
+
+    return null;
+};
 
 export const showBooks = () => {
     return books
@@ -59,7 +85,7 @@ export const showBooks = () => {
             (book) => `
                 <div class="book-item">
                     <h2>${book.title}</h2>
-                    <p><strong>Автор:</strong> ${book.author}</p>
+                    <p><strong>Автори:</strong> ${getAuthorLinks(book.authorIds)}</p>
                     <p><strong>Год:</strong> ${book.year}</p>
                     <p>${book.description}</p>
                     <a href="/book?id=${book.id}">Смотреть</a>

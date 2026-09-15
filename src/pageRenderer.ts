@@ -1,4 +1,18 @@
+import { authors } from './authors.js';
 import { getBookById, showBooks } from './showBooks.js';
+
+const getAuthorLinksHtml = (authorIds: number[]) => {
+    if (!authorIds.length) {
+        return 'Не вказано';
+    }
+
+    return authorIds
+        .map((authorId) => {
+            const author = authors.find((item) => item.id === authorId);
+            return author ? `<a href="/authors?id=${author.id}">${author.name}</a>` : 'Невідомий автор';
+        })
+        .join(', ');
+};
 
 export const renderMainPage = () => `
     <!DOCTYPE html>
@@ -82,7 +96,7 @@ export const renderBookPage = (id: number) => {
         <body>
             <div class="book-card">
                 <h1>${book.title}</h1>
-                <p><strong>Автор:</strong> ${book.author}</p>
+                <p><strong>Автори:</strong> ${getAuthorLinksHtml(book.authorIds)}</p>
                 <p><strong>Год:</strong> ${book.year}</p>
                 <p><strong>Жанр:</strong> ${book.genre}</p>
                 <p>${book.description}</p>
