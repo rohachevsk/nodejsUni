@@ -1,33 +1,181 @@
+<style>
+    .book-card {
+        transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+    }
+    .book-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, .15) !important;
+    }
+    .book-cover {
+        height: 320px;
+        object-fit: cover;
+    }
+    .book-price-badge {
+        position: absolute;
+        top: .75rem;
+        right: .75rem;
+    }
+    .book-actions .btn {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <section class="container py-4">
     <p class="text-uppercase text-secondary mb-2">Каталог</p>
-    <h1 class="mb-4">Книги</h1>
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 class="mb-0">Книги</h1>
+        <% if (typeof books !== 'undefined' && books.length) { %>
+            <span class="badge text-bg-primary rounded-pill fs-6"><%= books.length %></span>
+        <% } %>
+    </div>
 
     <div class="row g-4">
         <% if (typeof books !== 'undefined' && books.length) { %>
             <% books.forEach((book, index) => { %>
                 <% const fallbackCover = `/photo${(index % 3) + 1}.jpg`; %>
                 <% const cover = book.image ? `/images/${encodeURIComponent(book.image)}` : fallbackCover; %>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm">
-                        <img src="<%= cover %>" class="card-img-top" alt="<%= book.title %>" style="height: 220px; object-fit: cover;" loading="lazy" onerror="this.onerror=null;this.src='<%= fallbackCover %>';">
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 shadow-sm border-0 book-card">
+                        <div class="position-relative">
+                            <img src="<%= cover %>" class="card-img-top book-cover w-100" alt="<%= book.title %>" loading="lazy" onerror="this.onerror=null;this.src='<%= fallbackCover %>';">
+                            <% if (book.price !== undefined && book.price !== null) { %>
+                                <span class="badge text-bg-success book-price-badge fs-6 shadow"><%= book.price %> ₴</span>
+                            <% } %>
+                            <% if (!book.is_active) { %>
+                                <span class="badge text-bg-secondary position-absolute bottom-0 start-0 m-2">Немає в наявності</span>
+                            <% } %>
+                        </div>
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title"><%= book.title %></h5>
                             <% if (book.description) { %>
-                                <p class="card-text"><%= book.description %></p>
-                            <% } %>
-                            <% if (book.price !== undefined && book.price !== null) { %>
-                                <p class="fw-bold mb-2"><%= book.price %> ₴</p>
+                                <p class="card-text text-secondary small"><%= book.description %></p>
                             <% } %>
                             <% if (book.genre || book.year) { %>
-                                <p class="text-muted small mb-2"><%= [book.genre, book.year].filter(Boolean).join(' · ') %></p>
+                                <p class="text-muted small mb-3"><%= [book.genre, book.year].filter(Boolean).join(' · ') %></p>
                             <% } %>
-                            <button class="btn btn-primary mt-auto">Подробнее</button>
+                            <div class="mt-auto pt-2 border-top book-actions">
+                                <% if (book.price !== undefined && book.price !== null) { %>
+                                    <div class="fw-bold fs-5 mb-2"><%= book.price %> ₴</div>
+                                <% } %>
+                                <div class="d-grid gap-2">
+                                    <a href="/api/books/<%= book.id %>" class="btn btn-primary btn-sm">Подробнее</a>
+                                    <div class="row g-2">
+                                        <div class="col-6 d-grid">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm btn-edit"
+                                                data-id="<%= book.id %>"
+                                                data-title="<%= book.title %>"
+                                                data-price="<%= book.price ?? '' %>"
+                                                data-active="<%= book.is_active ? '1' : '0' %>"
+                                                data-image="<%= book.image ?? '' %>"
+                                                data-bs-toggle="modal" data-bs-target="#editBookModal">Редагувати</button>
+                                        </div>
+                                        <div class="col-6 d-grid">
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-delete" data-id="<%= book.id %>" data-title="<%= book.title %>">Видалити</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             <% }) %>
         <% } else { %>
-            <p>Книги не найдены.</p>
+            <div class="col-12">
+                <div class="alert alert-light border text-center py-5" role="alert">
+                    <h4 class="alert-heading">Книги не найдены</h4>
+                    <p class="mb-0 text-secondary">Спробуйте пізніше або додайте нові книги в каталог.</p>
+                </div>
+            </div>
         <% } %>
     </div>
 </section>
+
+<!-- Модалка редагування книги (PUT /api/books/:id) -->
+<div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="editBookForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBookLabel">Редагувати книгу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editBookId">
+                <div class="mb-3">
+                    <label class="form-label" for="editBookTitle">Назва</label>
+                    <input class="form-control" id="editBookTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="editBookPrice">Ціна (₴)</label>
+                    <input class="form-control" id="editBookPrice" type="number" min="0" step="1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="editBookImage">Файл обкладинки</label>
+                    <input class="form-control" id="editBookImage" placeholder="наприклад, clean-code.jpg">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="editBookActive">
+                    <label class="form-check-label" for="editBookActive">В наявності</label>
+                </div>
+                <div class="alert alert-danger d-none mt-3" id="editBookError" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <button type="submit" class="btn btn-primary">Зберегти</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Видалення книги: DELETE /api/books/:id
+    document.querySelectorAll('.btn-delete').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            if (!confirm(`Видалити "${btn.dataset.title}" з бази?`)) return;
+            const res = await fetch(`/api/books/${btn.dataset.id}`, { method: 'DELETE' });
+            if (res.ok) {
+                location.reload();
+            } else {
+                const body = await res.json().catch(() => ({}));
+                alert(body.error || 'Не вдалося видалити книгу');
+            }
+        });
+    });
+
+    // Редагування книги: заповнити модалку + PUT /api/books/:id
+    const editForm = document.getElementById('editBookForm');
+    const editError = document.getElementById('editBookError');
+    document.querySelectorAll('.btn-edit').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            document.getElementById('editBookId').value = btn.dataset.id;
+            document.getElementById('editBookTitle').value = btn.dataset.title;
+            document.getElementById('editBookPrice').value = btn.dataset.price;
+            document.getElementById('editBookImage').value = btn.dataset.image;
+            document.getElementById('editBookActive').checked = btn.dataset.active === '1';
+            editError.classList.add('d-none');
+        });
+    });
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editBookId').value;
+        const price = document.getElementById('editBookPrice').value;
+        const res = await fetch(`/api/books/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: document.getElementById('editBookTitle').value.trim(),
+                price: price === '' ? null : Number(price),
+                image: document.getElementById('editBookImage').value.trim() || null,
+                is_active: document.getElementById('editBookActive').checked,
+            }),
+        });
+        if (res.ok) {
+            location.reload();
+        } else {
+            const body = await res.json().catch(() => ({}));
+            editError.textContent = body.error || 'Не вдалося зберегти зміни';
+            editError.classList.remove('d-none');
+        }
+    });
+</script>
