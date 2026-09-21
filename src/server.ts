@@ -1,267 +1,266 @@
-import path from "node:path";
-import fs from "node:fs";
-import express, { type Request, type Response } from "express";
-import "dotenv/config";
-import { renderMainPage, renderBookPage } from './pageRenderer.js';
-import books, { getBooksByTitle } from './showBooks.js';
-import type { BookType } from './Booktype.js';
-import { authors } from './authors.js';
+// import path from "node:path";
+// import fs from "node:fs";
+// import express, { type Request, type Response } from "express";
+// import "dotenv/config";
+// import { renderMainPage, renderBookPage } from './pageRenderer.js';
+// import { books } from './data/books.js';
+// import { authors } from './authors.js';
+// import booksRouter from './routes/books.js';
+// import { checkDatabaseConnection, db } from './db.js';
 
-type BookResponseType = {
-    data: BookType[] | null;
-    error: string | null;
-    status: number;
+// const PATH_TO_PAGES = path.join(process.cwd(), 'src', 'pages');
+// const PORT = Number(process.env.PORT) || 3003;
+// const SERVER_NAME = process.env.SERVER_NAME || 'My Server';
+// const HOST = process.env.HOST || 'localhost';
+
+// const app = express();
+// app.set('view engine', 'ejs');
+// app.set('views', path.join(process.cwd(), 'views'));
+// app.use(express.static("public"));
+// app.use(express.json());
+// app.use('/books', booksRouter);
+
+// app.get('/db/health', async (_req: Request, res: Response) => {
+//     try {
+//         await checkDatabaseConnection();
+//         res.status(200).json({ status: 200, data: { connected: true }, error: null });
+//     } catch (error) {
+//         console.error('Database health check failed:', error);
+//         res.status(503).json({ status: 503, data: { connected: false }, error: 'Database unavailable' });
+//     }
+// });
+
+// app.get('/authors', (req: Request, res: Response) => {
+//     const id = Number(req.query.id);
+
+//     if (Number.isFinite(id)) {
+//         const author = authors.find((item) => item.id === id);
+
+//         if (!author) {
+//             res.status(404).json({
+//                 status: 404,
+//                 error: 'Author not found',
+//                 data: null,
+//             });
+//             return;
+//         }
+
+//         const authorBooks = books.filter((book) => book.authorIds.includes(author.id));
+
+//         res.status(200).json({
+//             status: 200,
+//             data: {
+//                 author,
+//                 books: authorBooks,
+//             },
+//         });
+//         return;
+//     }
+
+//     res.status(200).json({
+//         status: 200,
+//         data: authors,
+//     });
+// });
+
+// app.get('/authors/:id', (req: Request, res: Response) => {
+//     const id = Number(req.params.id);
+//     const author = authors.find((item) => item.id === id);
+
+//     if (!author) {
+//         res.status(404).json({
+//             status: 404,
+//             error: 'Author not found',
+//             data: null,
+//         });
+//         return;
+//     }
+
+//     const authorBooks = books.filter((book) => book.authorIds.includes(author.id));
+
+//     res.status(200).json({
+//         status: 200,
+//         data: {
+//             author,
+//             books: authorBooks,
+//         },
+//     });
+// });
+
+// app.get('/', (_req: Request, res: Response) => {
+//     res.render('layouts/main', { title: 'Litera', page: 'pages/home' });
+// });
+
+// app.get('/about-page', (_req: Request, res: Response) => {
+//     res.render('layouts/main', { title: 'О нас | Litera', page: 'pages/about' });
+// });
+
+// app.get('/books-page', (_req: Request, res: Response) => {
+//     res.render('layouts/main', { title: 'Книги | Litera', page: 'pages/books', books });
+// });
+
+// app.get('/book', (req: Request, res: Response) => {
+//     const id = Number(req.query.id);
+//     res.type('html');
+//     res.send(renderBookPage(id));
+// });
+
+// app.get('/image/:filename', (req: Request<{ filename: string }>, res: Response) => {
+//     const filename = path.basename(req.params.filename);
+//     const imagePath = path.join(PATH_TO_PAGES, 'images', filename);
+
+//     if (filename !== req.params.filename || !/\.(?:jpg|jpeg|png|gif|webp)$/i.test(filename)) {
+//         res.status(400).json({ status: 400, data: null, error: 'Invalid image filename' });
+//         return;
+//     }
+
+//     res.sendFile(imagePath, (error) => {
+//         if (error && !res.headersSent) {
+//             const statusCode = (error as Error & { statusCode?: number }).statusCode;
+//             const responseStatus = statusCode === 404 ? 404 : 500;
+//             res.status(responseStatus).json({
+//                 status: responseStatus,
+//                 data: null,
+//                 error: responseStatus === 404 ? 'Image not found' : 'Unable to send image',
+//             });
+//         }
+//     });
+// });
+
+// app.use(express.static(PATH_TO_PAGES));
+
+// app.use((req: Request, res: Response) => {
+//     const relativePath = req.originalUrl.replace(/^\/+/, '');
+//     const normalizedPath = path.normalize(relativePath);
+//     const fullPath = path.join(PATH_TO_PAGES, normalizedPath);
+
+//     if (!fullPath.startsWith(PATH_TO_PAGES)) {
+//         res.status(403).send('Forbidden');
+//         return;
+//     }
+
+//     fs.readFile(fullPath, 'utf-8', (err, content) => {
+//         if (err) {
+//             res.status(404).send('File not found');
+//             return;
+//         }
+
+//         res.type(path.extname(fullPath));
+//         res.send(content);
+//     });
+// });
+
+// const server = app.listen(PORT, () => {
+//     console.log(`${SERVER_NAME} is running on http://${HOST}:${PORT}`);
+// });
+
+// const shutdown = async () => {
+//     server.close();
+//     await db.end();
+// };
+
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
+
+
+import express from "express"
+import "dotenv/config"
+import router from "./routes/books.js"
+import { books as fallbackBooks } from "./data/books.js"
+import type { BookType } from "./types/BookType.js"
+import { db } from "./db.js"
+import path from "node:path"
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const cl = console.log
+const PORT = process.env.PORT || 3003
+const HOST = process.env.HOST || "http://localhost"
+
+const app = express()
+
+app.set("views", path.join(__dirname, "../views"));
+app.set("view engine", "ejs");
+
+app.use(express.static(path.join(__dirname, "../public")))
+app.use("/images", express.static(path.join(__dirname, "../public/images")))
+app.use(express.json()) //body -> json
+
+// Книги из PostgreSQL (таблица books: id, title, price, is_active, image).
+// Если база недоступна — показываем локальный массив-заглушку.
+const getBooks = async (): Promise<BookType[]> => {
+    try {
+        const { rows } = await db.query('SELECT id, title, price, is_active, image FROM books ORDER BY id');
+        return rows.map((row: Record<string, unknown>) => ({
+            id: Number(row.id),
+            title: String(row.title ?? ''),
+            authorIds: [],
+            year: new Date().getFullYear(),
+            description: '',
+            genre: '',
+            quote: '',
+            is_active: Boolean(row.is_active ?? true),
+            image: (row.image as string | null) ?? null,
+            price: row.price === null || row.price === undefined ? null : Number(row.price),
+        }));
+    } catch (error) {
+        console.error('PostgreSQL unavailable, using fallback books:', (error as Error).message);
+        return fallbackBooks;
+    }
 };
 
-const PATH_TO_PAGES = path.join(process.cwd(), 'src', 'pages');
-const PORT = Number(process.env.PORT) || 3003;
-const SERVER_NAME = process.env.SERVER_NAME || 'My Server';
-const HOST = process.env.HOST || 'localhost';
+app.get('/', (_req, res) => {
+    res.render("layouts/main", { title: "Litera", activePage: "home", body: "<p>Hello World</p>" })
+})
 
-const app = express();
+app.get('/about-page', (_req, res) => {
+    res.render("layouts/main", { title: "О нас | Litera", activePage: "home", body: "<p>О нас</p>" })
+})
 
-app.use(express.json());
-
-app.get('/books/:title/:is_active', (req: Request, res: Response) => {
-    const titleFilter = String(req.params.title ?? '').trim().toLowerCase();
-    const isActiveFilter = String(req.params.is_active ?? '').trim().toLowerCase();
-
-    const activeOnly = isActiveFilter === 'true' || isActiveFilter === '1';
-
-    const filteredBooks = books.filter((book) => {
-        const matchesStatus = book.is_active === activeOnly;
-        const matchesTitle = book.title.toLowerCase().includes(titleFilter);
-        return matchesStatus && matchesTitle;
-    });
-
-    if (!filteredBooks.length) {
-        res.status(404).json({
-            status: 404,
-            error: 'No books found for the given title and active status',
-            data: [],
-        });
-        return;
-    }
-
-    res.status(200).json({
-        status: 200,
-        data: filteredBooks,
-    });
-});
-
-app.get('/books/:id', (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const book = books.find((item) => item.id === id);
-    const response: { data: typeof book | null; error: string | null; status: number } = {
-        data: null,
-        error: null,
-        status: 200,
-    };
-
-    if (!book) {
-        response.status = 404;
-        response.error = 'The book not found';
-        res.status(404).json(response);
-        return;
-    }
-
-    response.data = book;
-    res.status(200).json(response);
-});
-
-app.get('/books', (req: Request, res: Response) => {
-    const title: string = String(req.query.title || "").trim();
-
-    const response: BookResponseType = {
-        data: null,
-        error: null,
-        status: 200,
-    };
-
-    if (title === "") {
-        if (books.length > 0) {
-            response.data = books;
-        } else {
-            response.error = "Books list is empty";
-            response.status = 404;
-        }
-    } else {
-        const our_books: BookType[] | null = getBooksByTitle(title, books);
-
-        if (our_books !== null) {
-            response.data = our_books;
-        } else {
-            response.error = `The book "${title}" not found`;
-            response.status = 404;
-        }
-    }
-
-    res.writeHead(response.status, {
-        "Content-Type": "application/json",
-    });
-    res.end(JSON.stringify(response));
-});
-
-app.delete('/books/:id', (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const bookIndex = books.findIndex((book) => book.id === id);
-    const response: { data: (typeof books[number]) | null; error: string | null; status: number } = {
-        data: null,
-        error: null,
-        status: 200,
-    };
-
-    if (bookIndex === -1) {
-        response.status = 404;
-        response.error = 'The book not found';
-        res.status(404).json(response);
-        return;
-    }
-
-    const deletedBook = books[bookIndex];
-    books.splice(bookIndex, 1);
-
-    response.data = deletedBook;
-    res.status(200).json(response);
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(response));
-});
-
-app.post('/books', (req: Request, res: Response) => {
-    const { title, authorIds, author, year, description, genre, quote, is_active } = req.body ?? {};
-
-    const parsedAuthorIds = Array.isArray(authorIds)
-        ? authorIds
-            .map((id) => Number(id))
-            .filter((id) => Number.isFinite(id) && authors.some((item) => item.id === id))
-        : [];
-
-    if (!title || (!parsedAuthorIds.length && !author) || !description || !genre || !quote) {
-        res.status(400).json({
-            error: 'Missing required fields: title, authorIds or author, description, genre, quote',
-        });
-        return;
-    }
-
-    const nextId = books.reduce((maxId, book) => Math.max(maxId, book.id), 0) + 1;
-    const resolvedAuthorIds = parsedAuthorIds.length
-        ? parsedAuthorIds
-        : author
-            ? authors
-                .filter((item) => item.name.toLowerCase() === String(author).trim().toLowerCase())
-                .map((item) => item.id)
-            : [];
-
-    const newBook: BookType = {
-        id: nextId,
-        title: String(title),
-        authorIds: resolvedAuthorIds,
-        year: Number(year) || new Date().getFullYear(),
-        description: String(description),
-        genre: String(genre),
-        quote: String(quote),
-        is_active: is_active === undefined ? true : Boolean(is_active),
-    };
-
-    books.push(newBook);
-
-    res.status(201).json({
-        message: 'Book added successfully',
-        data: newBook,
-    });
-});
-
-app.get('/authors', (req: Request, res: Response) => {
-    const id = Number(req.query.id);
-
-    if (Number.isFinite(id)) {
-        const author = authors.find((item) => item.id === id);
-
-        if (!author) {
-            res.status(404).json({
-                status: 404,
-                error: 'Author not found',
-                data: null,
-            });
-            return;
-        }
-
-        const authorBooks = books.filter((book) => book.authorIds.includes(author.id));
-
-        res.status(200).json({
-            status: 200,
-            data: {
-                author,
-                books: authorBooks,
-            },
-        });
-        return;
-    }
-
-    res.status(200).json({
-        status: 200,
-        data: authors,
-    });
-});
-
-app.get('/authors/:id', (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const author = authors.find((item) => item.id === id);
-
-    if (!author) {
-        res.status(404).json({
-            status: 404,
-            error: 'Author not found',
-            data: null,
-        });
-        return;
-    }
-
-    const authorBooks = books.filter((book) => book.authorIds.includes(author.id));
-
-    res.status(200).json({
-        status: 200,
-        data: {
-            author,
-            books: authorBooks,
-        },
-    });
-});
-
-app.get('/', (_req: Request, res: Response) => {
-    res.sendFile(path.join(PATH_TO_PAGES, 'index.html'));
-});
-
-app.get('/book', (req: Request, res: Response) => {
-    const id = Number(req.query.id);
-    res.type('html');
-    res.send(renderBookPage(id));
-});
-
-app.use(express.static(PATH_TO_PAGES));
-
-app.use((req: Request, res: Response) => {
-    const relativePath = req.originalUrl.replace(/^\/+/, '');
-    const normalizedPath = path.normalize(relativePath);
-    const fullPath = path.join(PATH_TO_PAGES, normalizedPath);
-
-    if (!fullPath.startsWith(PATH_TO_PAGES)) {
-        res.status(403).send('Forbidden');
-        return;
-    }
-
-    fs.readFile(fullPath, 'utf-8', (err, content) => {
+app.get('/contacts', (_req, res, next) => {
+    app.render("pages/contacts", {}, (err, body) => {
         if (err) {
-            res.status(404).send('File not found');
+            next(err);
             return;
         }
-
-        res.type(path.extname(fullPath));
-        res.send(content);
+        res.render("layouts/main", { title: "Contacts | Litera", activePage: "contacts", body });
     });
-});
+})
+
+app.get('/books', async (_req, res, next) => {
+    try {
+        const books = await getBooks();
+        app.render("pages/books", { books }, (err, body) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            res.render("layouts/main", { title: "Книги | Litera", activePage: "books", body });
+        });
+    } catch (err) {
+        next(err);
+    }
+})
+
+app.get('/books-page', async (_req, res, next) => {
+    try {
+        const books = await getBooks();
+        app.render("pages/books", { books }, (err, body) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            res.render("layouts/main", { title: "Книги | Litera", activePage: "books", body });
+        });
+    } catch (err) {
+        next(err);
+    }
+})
+
+app.use("/api/books", router);
 
 app.listen(PORT, () => {
-    console.log(`${SERVER_NAME} is running on http://${HOST}:${PORT}`);
-});
+    cl(`Server has been started ${HOST}:${PORT}`)
+})
