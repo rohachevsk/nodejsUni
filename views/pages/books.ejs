@@ -29,6 +29,7 @@
         <% if (typeof books !== 'undefined' && books.length) { %>
             <span class="badge text-bg-primary rounded-pill fs-6"><%= books.length %></span>
         <% } %>
+        <button type="button" class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addBookModal">+ Додати книгу</button>
     </div>
 
     <div class="row g-4">
@@ -60,7 +61,7 @@
                                     <div class="fw-bold fs-5 mb-2"><%= book.price %> ₴</div>
                                 <% } %>
                                 <div class="d-grid gap-2">
-                                    <a href="/api/books/<%= book.id %>" class="btn btn-primary btn-sm">Подробнее</a>
+                                    <a href="/books/<%= book.id %>" class="btn btn-primary btn-sm">Подробнее</a>
                                     <div class="row g-2">
                                         <div class="col-6 d-grid">
                                             <button type="button" class="btn btn-outline-secondary btn-sm btn-edit"
@@ -91,6 +92,46 @@
         <% } %>
     </div>
 </section>
+
+<!-- Модалка додавання книги з малюнком (POST /api/books, multipart) -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addBookForm" class="modal-content" enctype="multipart/form-data">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookLabel">Додати книгу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="addBookTitle">Назва</label>
+                    <input class="form-control" id="addBookTitle" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="addBookPrice">Ціна (₴)</label>
+                    <input class="form-control" id="addBookPrice" name="price" type="number" min="0" step="1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="addBookCover">Малюнок обкладинки</label>
+                    <input class="form-control" id="addBookCover" name="cover" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <div class="form-text">jpg, jpeg, png, gif, webp до 5 МБ</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="addBookImage">Або ім'я файлу</label>
+                    <input class="form-control" id="addBookImage" name="image" placeholder="наприклад, clean-code.jpg">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="addBookActive" name="is_active" checked>
+                    <label class="form-check-label" for="addBookActive">В наявності</label>
+                </div>
+                <div class="alert alert-danger d-none mt-3" id="addBookError" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <button type="submit" class="btn btn-success">Додати</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Модалка редагування книги (PUT /api/books/:id) -->
 <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookLabel" aria-hidden="true">
@@ -129,6 +170,27 @@
 </div>
 
 <script>
+    // Додавання книги з малюнком: POST /api/books (multipart FormData)
+    const addForm = document.getElementById('addBookForm');
+    const addError = document.getElementById('addBookError');
+    addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(addForm);
+        const coverInput = document.getElementById('addBookCover');
+        if (!coverInput.files.length) {
+            formData.delete('cover');
+        }
+        formData.set('is_active', document.getElementById('addBookActive').checked ? 'true' : 'false');
+        const res = await fetch('/api/books', { method: 'POST', body: formData });
+        if (res.ok) {
+            location.reload();
+        } else {
+            const body = await res.json().catch(() => ({}));
+            addError.textContent = body.error || 'Не вдалося додати книгу';
+            addError.classList.remove('d-none');
+        }
+    });
+
     // Видалення книги: DELETE /api/books/:id
     document.querySelectorAll('.btn-delete').forEach((btn) => {
         btn.addEventListener('click', async () => {
