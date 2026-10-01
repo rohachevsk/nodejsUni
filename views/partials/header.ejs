@@ -17,6 +17,15 @@
                         <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'contacts' ? 'active' : '' %>" href="/contacts">Contacts</a>
                     </li>
                 </ul>
+                <% if (typeof username !== 'undefined' && username !== 'guest') { %>
+                    <span class="navbar-text text-light ms-3">Вітаємо, <%= username %></span>
+                    <form method="POST" action="/logout" class="d-flex ms-2">
+                        <button type="submit" class="btn btn-outline-light btn-sm">Вийти</button>
+                    </form>
+                <% } else { %>
+                    <span class="navbar-text text-secondary ms-3">Гість</span>
+                    <a class="btn btn-outline-light btn-sm ms-2" href="/login">Вхід</a>
+                <% } %>
             </div>
         </div>
     </nav>

@@ -163,12 +163,16 @@
 // process.on('SIGTERM', shutdown);
 
 
-import express from "express"
+import express, { type Request, type Response } from "express"
+import cookieParser from "cookie-parser"
 import "dotenv/config"
 import router from "./routes/books.js"
+import authRouter from "./routes/auth.js"
+import { authMiddleware } from "./middlewares/authMiddleware.js"
 import { books as fallbackBooks } from "./data/books.js"
 import type { BookType } from "./types/BookType.js"
 import { db } from "./db.js"
+import { loggerMiddleware } from "./middlewares/loggerMiddleware.js"
 import path from "node:path"
 import { fileURLToPath } from "node:url";
 
@@ -187,6 +191,10 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "../public")))
 app.use("/images", express.static(path.join(__dirname, "../public/images")))
 app.use(express.json()) //body -> json
+app.use(express.urlencoded({ extended: false })) //body -> form
+app.use(cookieParser()) //req.cookies
+app.use(loggerMiddleware) // логує ВСІ запити: сторінки, /api, статику ні (вона вище)
+app.use(authMiddleware) // res.locals.username: імʼя з кукі або "guest"
 
 // Книги из PostgreSQL (таблица books: id, title, price, is_active, image).
 // Если база недоступна — показываем локальный массив-заглушку.
@@ -218,6 +226,10 @@ app.get('/', (_req, res) => {
 app.get('/about-page', (_req, res) => {
     res.render("layouts/main", { title: "О нас | Litera", activePage: "home", body: "<p>О нас</p>" })
 })
+app.get("/cookie", (req: Request, res: Response) => {
+    res.cookie("username", "Vanya");
+    res.send("Cookie created");
+});
 
 app.get('/contacts', (_req, res, next) => {
     app.render("pages/contacts", {}, (err, body) => {
@@ -259,7 +271,56 @@ app.get('/books-page', async (_req, res, next) => {
     }
 })
 
+// Фронтенд сторінка однієї книги
+app.get('/books/:id', async (req, res, next) => {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+        res.status(400).render("layouts/main", { title: "Помилка | Litera", activePage: "books", body: "<p>Невірний id книги</p>" });
+        return;
+    }
+    try {
+        const { rows } = await db.query('SELECT id, title, price, is_active, image FROM books WHERE id = $1', [id]);
+        if (rows.length === 0) {
+            const fallback = fallbackBooks.find((b) => b.id === id);
+            if (!fallback) {
+                res.status(404).render("layouts/main", { title: "Не знайдено | Litera", activePage: "books", body: "<p>Книгу не знайдено</p>" });
+                return;
+            }
+            app.render("pages/book", { book: fallback }, (err, body) => {
+                if (err) {
+                    next(err);
+                    return;
+                }
+                res.render("layouts/main", { title: `${fallback.title} | Litera`, activePage: "books", body });
+            });
+            return;
+        }
+        const book: BookType = {
+            id: Number(rows[0].id),
+            title: String(rows[0].title ?? ''),
+            authorIds: [],
+            year: new Date().getFullYear(),
+            description: '',
+            genre: '',
+            quote: '',
+            is_active: Boolean(rows[0].is_active ?? true),
+            image: (rows[0].image as string | null) ?? null,
+            price: rows[0].price === null || rows[0].price === undefined ? null : Number(rows[0].price),
+        };
+        app.render("pages/book", { book }, (err, body) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            res.render("layouts/main", { title: `${book.title} | Litera`, activePage: "books", body });
+        });
+    } catch (err) {
+        next(err);
+    }
+})
+
 app.use("/api/books", router);
+app.use("/", authRouter);
 
 app.listen(PORT, () => {
     cl(`Server has been started ${HOST}:${PORT}`)
