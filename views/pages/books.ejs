@@ -145,15 +145,20 @@
                 <input type="hidden" id="editBookId">
                 <div class="mb-3">
                     <label class="form-label" for="editBookTitle">Назва</label>
-                    <input class="form-control" id="editBookTitle" required>
+                    <input class="form-control" id="editBookTitle" name="title" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="editBookPrice">Ціна (₴)</label>
-                    <input class="form-control" id="editBookPrice" type="number" min="0" step="1">
+                    <input class="form-control" id="editBookPrice" name="price" type="number" min="0" step="1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="editBookCover">Новий малюнок</label>
+                    <input class="form-control" id="editBookCover" name="cover" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <div class="form-text">jpg, jpeg, png, gif, webp до 5 МБ. Без вибору — лишається старий.</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="editBookImage">Файл обкладинки</label>
-                    <input class="form-control" id="editBookImage" placeholder="наприклад, clean-code.jpg">
+                    <input class="form-control" id="editBookImage" name="image" placeholder="наприклад, clean-code.jpg">
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="editBookActive">
@@ -213,6 +218,7 @@
             document.getElementById('editBookId').value = btn.dataset.id;
             document.getElementById('editBookTitle').value = btn.dataset.title;
             document.getElementById('editBookPrice').value = btn.dataset.price;
+            document.getElementById('editBookCover').value = '';
             document.getElementById('editBookImage').value = btn.dataset.image;
             document.getElementById('editBookActive').checked = btn.dataset.active === '1';
             editError.classList.add('d-none');
@@ -221,16 +227,26 @@
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('editBookId').value;
+        const formData = new FormData(editForm);
+        const coverInput = document.getElementById('editBookCover');
+        const imageText = document.getElementById('editBookImage').value.trim();
+        if (!coverInput.files.length) {
+            formData.delete('cover');
+        }
+        if (coverInput.files.length || !imageText) {
+            formData.delete('image');
+        }
         const price = document.getElementById('editBookPrice').value;
+        formData.set('title', document.getElementById('editBookTitle').value.trim());
+        if (price === '') {
+            formData.delete('price');
+        } else {
+            formData.set('price', String(Number(price)));
+        }
+        formData.set('is_active', document.getElementById('editBookActive').checked ? 'true' : 'false');
         const res = await fetch(`/api/books/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: document.getElementById('editBookTitle').value.trim(),
-                price: price === '' ? null : Number(price),
-                image: document.getElementById('editBookImage').value.trim() || null,
-                is_active: document.getElementById('editBookActive').checked,
-            }),
+            body: formData,
         });
         if (res.ok) {
             location.reload();
